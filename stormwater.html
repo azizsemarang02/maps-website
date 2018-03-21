@@ -1,295 +1,540 @@
-<!DOCTYPE html>
-<meta http-equiv="X-UA-Compatible" content="IE=Edge">
-<html>
-<head>
-    <meta http-equiv="Access-Control-Allow-Origin" content="*">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Stormwater - Glenorchy City Council</title>
-
-    <link type="text/css" rel="stylesheet" href="src/leaflet/leaflet.css" />
-    <script type="text/javascript" src="src/leaflet/leaflet.js"></script>
-    <script src="src/listBaseLayers.js" type="text/javascript"></script>  
-    <script src="src/leaflet/gcc_config.js" type="text/javascript"></script>
-
-    <link rel="stylesheet" href="css/jquery.mobile-1.1.1.min.css" />
-    <link rel="stylesheet" href="src/leaflet/locate/L.Control.Locate.css" />
-    <link rel="stylesheet" href="css/main.css" />
-    <link rel="stylesheet" href="css/nps.css" />
-    <link rel="stylesheet" href="src/leaflet/gcc_geosearch/l.gcc_geosearch.css" />
-    <link rel="stylesheet" href="src/leaflet/draw/leaflet.draw.css" />
-    
-    <!--[if lt IE 9]>
-     <link rel="stylesheet" href="src/leaflet/locate/L.Control.Locate.ie.css" />
-     <link rel="stylesheet" href="src/leaflet/gcc_geosearch/l.gcc_geosearch.ie.css" />
-     <link rel="stylesheet" href="css/ie6.css" type="text/css" />
-    <![endif]-->
-
-    <script src="src/leaflet/gcc_geosearch/gcc_geosearch.js"></script>
-    <script src="src/leaflet/locate/L.Control.Locate.js"></script>
-    <script src="src/jquery/jquery-1.7.1.min.js"></script>
-    <script src="src/lib/proj4js-compressed.js"></script>
-    <script src="src\lib\defs\EPSG28355.js" type="text/javascript"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places"></script>
-
-    <script src="src/leaflet/draw/leaflet.draw.js"></script>
-    <script src="src/leaflet/gcc_draw.js"></script>
-    <style>
-        body {
-            padding: 0;
-            margin: 0;
-        }
-        html, body, #map {
-            height: 100%;
-        }
-    </style>
-</head>
-<body>    
-    <div id="map"></div>
-</body>
-    <script>
-    var center = new L.LatLng(-42.8232,147.2555);
-    var map = new L.Map('map', { 
-        center: center, 
-        zoom: 14, 
-        attributionControl:true, 
-        zoomControl:false, 
-        minZoom:11,
-        detectRetina:true
-    });    
-
-    var src = new Proj4js.Proj('EPSG:4326');
-    var dst = new Proj4js.Proj('EPSG:28355');   
-    
-    var baselayers = {
-        "LIST Aerial Imagery": LISTAerial,
-        "LIST Topographic": LISTTopographic
-    };    
-    map.addLayer(LISTTopographic)
-    
-    var rootURL = 'https://maps.gcc.tas.gov.au/'
-    var overlays = {
-        "SW Pits": 'GCC_cc:Stormwaterpits',
-        "SW Pipes": 'GCC_cc:Stormwaterpipes',
-        "SW Accuracy Labels": 'GCC_cc:Stormwaterpits_acc_labels' 
-    };
-    var lOverlays = {};
-
-    //Set up trigger functions for adding layers to interactivity.
-    map.on('overlayadd', function(e) {
-        updateInteractiveLayers(e.layer.options.layers);
-    }); 
-    map.on('overlayremove', function(e) {
-        updateInteractiveLayers(e.layer.options.layers);
-    }); 
-
-    var intLayers = [];
-    var intLayersString = "";
-    function updateInteractiveLayers(layer) {
-        if(layer !== "GCC_cc:Stormwaterpits_acc_labels") { //exclude this layer...
-            var index = $.inArray(layer, intLayers);
-            if(index > -1) {
-                intLayers.splice(index,1);
-            } else {
-                intLayers.push(layer);
-            }
-            intLayersString = intLayers.join();
-        }
-    };
-    for (layer in overlays) {
-        var newLayer = new L.TileLayer.WMS(rootURL + "/geoserver/gwc/service/wms", {
-            layers: overlays[layer],
-            format: 'image/png',
-            transparent: true,
-            maxZoom: 20,
-            attribution: gccAtt
-        });
-        lOverlays[layer] = newLayer;
-        map.addLayer(newLayer);
-        updateInteractiveLayers(overlays[layer]);
-    };
-
-    function handleJson(data) {
-        selectedFeature = L.geoJson(data, {
-            style: function (feature) {
-                return {color: 'yellow'};
-            },
-            onEachFeature: function (feature, layer) {
-                var content = "";
-                content = content + "<b><u>" + feature.id.split('.')[0] + "</b></u><br>";
-                delete feature.properties.bbox;
-                for (var name in feature.properties) {content = content + "<b>" + name + ":</b> " + feature.properties[name] + "<br>"};
-                var popup = L.popup()
-                    .setLatLng(queryCoordinates)
-                    .setContent(content)
-                    .openOn(map);
-                layer.bindPopup(content);
-                layer.on({
-                    mouseover: highlightFeature,
-                    mouseout: resetHighlight
-                });
-            },                
-            pointToLayer: function (feature, latlng) {
-                return L.circleMarker(latlng, {
-                    radius: 5,
-                    fillColor: "yellow",
-                    color: "#000",
-                    weight: 5,
-                    opacity: 0.6,
-                    fillOpacity: 0.2
-                });
-            }
-        });
-        selectedFeature.addTo(map);
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              110.78149795532227,
+              -6.771159284990258
+            ],
+            [
+              110.77634811401367,
+              -6.776273178963114
+            ],
+            [
+              110.7832145690918,
+              -6.7815574790915285
+            ],
+            [
+              110.78115463256836,
+              -6.789228134206112
+            ],
+            [
+              110.77634811401367,
+              -6.794171380507531
+            ],
+            [
+              110.76261520385741,
+              -6.802353193752624
+            ],
+            [
+              110.76553344726561,
+              -6.808659913019987
+            ],
+            [
+              110.775146484375,
+              -6.8105348676329855
+            ],
+            [
+              110.78252792358398,
+              -6.821784441359926
+            ],
+            [
+              110.78475952148438,
+              -6.829113566966554
+            ],
+            [
+              110.79008102416992,
+              -6.846157610760059
+            ],
+            [
+              110.7813262939453,
+              -6.854508970104235
+            ],
+            [
+              110.7447624206543,
+              -6.863371477122872
+            ],
+            [
+              110.72896957397461,
+              -6.865246217086443
+            ],
+            [
+              110.72244644165039,
+              -6.855361141404773
+            ],
+            [
+              110.73240280151367,
+              -6.82536379579172
+            ],
+            [
+              110.73240280151367,
+              -6.811046217619413
+            ],
+            [
+              110.72210311889648,
+              -6.813262061261408
+            ],
+            [
+              110.71781158447266,
+              -6.828602236263842
+            ],
+            [
+              110.71386337280273,
+              -6.845134985283045
+            ],
+            [
+              110.71283340454102,
+              -6.850759398284253
+            ],
+            [
+              110.70425033569336,
+              -6.847009796983645
+            ],
+            [
+              110.69051742553711,
+              -6.8401922645961735
+            ],
+            [
+              110.68124771118164,
+              -6.833033750862019
+            ],
+            [
+              110.6685447692871,
+              -6.831499769686059
+            ],
+            [
+              110.66408157348633,
+              -6.847350671046949
+            ],
+            [
+              110.67197799682617,
+              -6.860133272523383
+            ],
+            [
+              110.6817626953125,
+              -6.870359106716451
+            ],
+            [
+              110.6601333618164,
+              -6.8751310874405736
+            ],
+            [
+              110.64382553100586,
+              -6.880584721016809
+            ],
+            [
+              110.63404083251952,
+              -6.873938096750811
+            ],
+            [
+              110.62494277954102,
+              -6.8642236325671995
+            ],
+            [
+              110.6074333190918,
+              -6.867802668770593
+            ],
+            [
+              110.60331344604492,
+              -6.856383744954038
+            ],
+            [
+              110.5997085571289,
+              -6.850588962500937
+            ],
+            [
+              110.58614730834961,
+              -6.851270705268729
+            ],
+            [
+              110.57859420776367,
+              -6.8676322390856726
+            ],
+            [
+              110.57619094848633,
+              -6.879050892902536
+            ],
+            [
+              110.57069778442383,
+              -6.890639693674967
+            ],
+            [
+              110.58683395385742,
+              -6.897115664880333
+            ],
+            [
+              110.59164047241211,
+              -6.907511117694093
+            ],
+            [
+              110.57155609130858,
+              -6.911941897004693
+            ],
+            [
+              110.57498931884766,
+              -6.930005413286767
+            ],
+            [
+              110.59215545654297,
+              -6.927449297324298
+            ],
+            [
+              110.5935287475586,
+              -6.938866507948674
+            ],
+            [
+              110.60760498046875,
+              -6.943126590260386
+            ],
+            [
+              110.62030792236328,
+              -6.941252158793953
+            ],
+            [
+              110.63215255737305,
+              -6.935628819608933
+            ],
+            [
+              110.63730239868163,
+              -6.932731921702812
+            ],
+            [
+              110.64605712890625,
+              -6.913134792031106
+            ],
+            [
+              110.65275192260741,
+              -6.913816444979958
+            ],
+            [
+              110.65893173217773,
+              -6.92608602981206
+            ],
+            [
+              110.67094802856445,
+              -6.941592965070476
+            ],
+            [
+              110.67850112915039,
+              -6.951646639143831
+            ],
+            [
+              110.69034576416016,
+              -6.955054615454706
+            ],
+            [
+              110.69395065307617,
+              -6.96255207628002
+            ],
+            [
+              110.70562362670898,
+              -6.965619184820332
+            ],
+            [
+              110.71300506591797,
+              -6.956928991886221
+            ],
+            [
+              110.71420669555664,
+              -6.938866507948674
+            ],
+            [
+              110.72107315063477,
+              -6.912453138098992
+            ],
+            [
+              110.73068618774413,
+              -6.896263568462635
+            ],
+            [
+              110.73686599731445,
+              -6.879050892902536
+            ],
+            [
+              110.74544906616211,
+              -6.873256386440719
+            ],
+            [
+              110.76639175415039,
+              -6.873085958710427
+            ],
+            [
+              110.7887077331543,
+              -6.864564494317737
+            ],
+            [
+              110.79574584960938,
+              -6.873597241717975
+            ],
+            [
+              110.81136703491211,
+              -6.867120949664575
+            ],
+            [
+              110.80793380737305,
+              -6.881095995953889
+            ],
+            [
+              110.79814910888672,
+              -6.904443630776409
+            ],
+            [
+              110.79317092895506,
+              -6.9136460318349275
+            ],
+            [
+              110.7809829711914,
+              -6.920973741554143
+            ],
+            [
+              110.77909469604492,
+              -6.935288009015175
+            ],
+            [
+              110.77651977539062,
+              -6.9467050295945265
+            ],
+            [
+              110.78458786010742,
+              -6.952157837166398
+            ],
+            [
+              110.7996940612793,
+              -6.948068237417079
+            ],
+            [
+              110.80999374389648,
+              -6.957780978699956
+            ],
+            [
+              110.82304000854492,
+              -6.964937606877928
+            ],
+            [
+              110.83608627319336,
+              -6.961700098126731
+            ],
+            [
+              110.8469009399414,
+              -6.957951375877178
+            ],
+            [
+              110.84020614624022,
+              -6.937844082456885
+            ],
+            [
+              110.84260940551758,
+              -6.921996203636636
+            ],
+            [
+              110.85943222045898,
+              -6.920973741554143
+            ],
+            [
+              110.87110519409178,
+              -6.910067341594728
+            ],
+            [
+              110.88363647460936,
+              -6.912453138098992
+            ],
+            [
+              110.88981628417969,
+              -6.900012781233553
+            ],
+            [
+              110.89771270751953,
+              -6.883822786318728
+            ],
+            [
+              110.91178894042969,
+              -6.882970666012392
+            ],
+            [
+              110.91968536376953,
+              -6.889105898061944
+            ],
+            [
+              110.92672348022461,
+              -6.891662221327114
+            ],
+            [
+              110.93805313110352,
+              -6.889446741960255
+            ],
+            [
+              110.9461212158203,
+              -6.880243870752909
+            ],
+            [
+              110.94955444335938,
+              -6.870699964070965
+            ],
+            [
+              110.94766616821289,
+              -6.858088079325887
+            ],
+            [
+              110.95693588256835,
+              -6.853827231966808
+            ],
+            [
+              110.95367431640624,
+              -6.836613021132634
+            ],
+            [
+              110.94680786132812,
+              -6.827068240877113
+            ],
+            [
+              110.95367431640624,
+              -6.812750713637267
+            ],
+            [
+              110.96466064453125,
+              -6.811557567060759
+            ],
+            [
+              110.97959518432617,
+              -6.804569077529834
+            ],
+            [
+              110.98508834838867,
+              -6.795875936418244
+            ],
+            [
+              110.99967956542967,
+              -6.797410031571022
+            ],
+            [
+              111.01530075073242,
+              -6.789739506868355
+            ],
+            [
+              111.01821899414062,
+              -6.781387018701431
+            ],
+            [
+              111.01306915283203,
+              -6.774568553662901
+            ],
+            [
+              111.00311279296875,
+              -6.773545775590888
+            ],
+            [
+              111.00311279296875,
+              -6.762124606551574
+            ],
+            [
+              110.99435806274414,
+              -6.762295073746761
+            ],
+            [
+              110.97942352294922,
+              -6.773375312368049
+            ],
+            [
+              110.96620559692383,
+              -6.776443641161725
+            ],
+            [
+              110.95178604125977,
+              -6.783262079675447
+            ],
+            [
+              110.94440460205078,
+              -6.775761792005727
+            ],
+            [
+              110.95212936401367,
+              -6.76127226967365
+            ],
+            [
+              110.9535026550293,
+              -6.7488279801626865
+            ],
+            [
+              110.95041275024414,
+              -6.737406227454885
+            ],
+            [
+              110.94354629516602,
+              -6.729393792611369
+            ],
+            [
+              110.92947006225586,
+              -6.726836604716632
+            ],
+            [
+              110.91573715209961,
+              -6.729905228574488
+            ],
+            [
+              110.91161727905273,
+              -6.7164372353137045
+            ],
+            [
+              110.8915328979492,
+              -6.717119167990038
+            ],
+            [
+              110.87831497192383,
+              -6.723938442162671
+            ],
+            [
+              110.86526870727539,
+              -6.728541398142492
+            ],
+            [
+              110.8626937866211,
+              -6.716778201771345
+            ],
+            [
+              110.84999084472656,
+              -6.717801099710462
+            ],
+            [
+              110.83866119384766,
+              -6.726154685670985
+            ],
+            [
+              110.82149505615234,
+              -6.7321214448558155
+            ],
+            [
+              110.80947875976562,
+              -6.729905228574488
+            ],
+            [
+              110.79282760620116,
+              -6.7437137958173246
+            ],
+            [
+              110.7813262939453,
+              -6.751896464843375
+            ],
+            [
+              110.78561782836913,
+              -6.758374313045555
+            ],
+            [
+              110.77943801879883,
+              -6.766386268386078
+            ],
+            [
+              110.78149795532227,
+              -6.771159284990258
+            ]
+          ]
+        ]
+      }
     }
-
-    //Query layer functionality.
-    var selectedFeature;
-    var queryCoordinates;
-    var src = new Proj4js.Proj('EPSG:4326');
-    var dst = new Proj4js.Proj('EPSG:28355');
-
-    map.on('click', function(e) {
-        if (selectedFeature) {
-            map.removeLayer(selectedFeature);
-        };
-        var owsrootUrl = rootURL + 'geoserver/ows';
-        
-        var p = new Proj4js.Point(e.latlng.lng,e.latlng.lat);
-        Proj4js.transform(src, dst, p);
-        queryCoordinates = e.latlng;
-        
-        var defaultParameters = {
-            service : 'WFS',
-            version : '1.1.1',
-            request : 'GetFeature',
-            typeName : intLayersString,
-            maxFeatures : 100,
-            outputFormat : 'text/javascript',
-            format_options : 'callback:getJson',
-            SrsName : 'EPSG:4326'
-        };
-
-        var customParams = {
-            //bbox : map.getBounds().toBBoxString(),
-            cql_filter:'DWithin(geom, POINT(' + p.x + ' ' + p.y + '), 10, meters)'
-        };
-
-        var parameters = L.Util.extend(defaultParameters, customParams);
-
-        var url = owsrootUrl + L.Util.getParamString(parameters)
-        //console.log(url);
-
-        $.ajax({
-            url : owsrootUrl + L.Util.getParamString(parameters),
-            dataType : 'jsonp',
-            jsonpCallback : 'getJson',
-            success : handleJson
-        });
-    });
-
-    function highlightFeature(e) {
-        var layer = e.target;
-        layer.setStyle({
-            fillColor: "yellow",
-            color: "yellow",
-            weight: 5,
-            opacity: 1
-        });
-
-        if (!L.Browser.ie && !L.Browser.opera) {
-            layer.bringToFront();
-        }
-    }
-
-    function resetHighlight(e) {
-        var layer = e.target;
-        layer.setStyle({
-            radius: 5,
-            fillColor: "yellow",
-            color: "yellow",
-            weight: 5,
-            opacity: 0.6,
-            fillOpacity: 0.2
-        });
-    }
-
-    //Location control
-    L.control.locate({
-        position: 'topright',  
-        drawCircle: false,
-        follow: false
-    }).addTo(map);
-    //Zoom control
-    L.control.zoom().addTo(map);    
-    //Layer control
-    L.control.layers(baselayers, lOverlays, {position: 'topleft'}).addTo(map);
-    //Search control
-    L.control.searchControl().addTo(map);
-
-    //Measure stuff
-    function is_touch_device() {
-      return 'ontouchstart' in window // works on most browsers 
-          || 'onmsgesturechange' in window; // works on ie10
-    };
-
-    if(!is_touch_device()) {
-        var drawnItems = new L.FeatureGroup();
-        map.addLayer(drawnItems);
-
-        // Set the title to show on the polygon button
-        L.drawLocal.draw.toolbar.buttons.polygon = 'Draw a polygon!';
-
-        var drawControl = new L.Control.Draw({
-            position: 'topright',
-            draw: {
-                polyline: {
-                    shapeOptions: {
-                        color: '#5C5DBF'                    
-                    }
-                },
-                rectangle: {
-                    shapeOptions: {
-                        color: '#5C5DBF'                    
-                    }
-                },
-                polygon: {
-                    allowIntersection: false,
-                    showArea: true,
-                    drawError: {
-                        color: '#F25567',
-                        timeout: 1000
-                    },
-                    shapeOptions: {
-                        color: '#5C5DBF'
-                    }
-                },
-                circle: false
-            },
-            edit: false
-        });
-        map.addControl(drawControl);
-        
-        map.on('draw:created', function (e) {updatePopup(e)});
-        
-        map.on('draw:edited', function (e) {
-            var layers = e.layers;
-            var countOfEditedLayers = 0;
-            layers.eachLayer(function(layer) {
-                countOfEditedLayers++;
-            });            
-        });
-    };
-    </script>
-
-    <script type="text/javascript">
-    //Analytics
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-36489204-2']);
-    _gaq.push(['_trackPageview']);    
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-    </script>
-</html>
+  ]
+}
